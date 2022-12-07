@@ -113,7 +113,7 @@ function! s:show_documentation()
   if (index(['vim','help'], &filetype) >= 0)
     execute 'h '.expand('<cword>')
   else
-    call CocAction('doHover')
+    call CocActionAsync('doHover')
   endif
 endfunction
 
@@ -124,10 +124,9 @@ EOF
 
 set tabstop=2 shiftwidth=2 expandtab
 
-" noh - no highlight
 map <esc> :noh <CR>
 
-nnoremap <C-a> :CocAction<CR>
+nnoremap <C-a> <Plug>(coc-codeaction-cursor)
 
 set clipboard=unnamedplus
 
