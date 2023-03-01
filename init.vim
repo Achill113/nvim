@@ -23,6 +23,8 @@ Plug 'nvim-telescope/telescope.nvim'
 Plug 'numToStr/Comment.nvim'
 Plug 'xiyaowong/nvim-transparent'
 Plug 'tpope/vim-fugitive'
+Plug 'codota/tabnine-nvim', { 'do': './dl_binaries.sh' }
+Plug 'HerringtonDarkholme/yats.vim'
 
 call plug#end()
 
@@ -153,6 +155,17 @@ lua << EOF
 require('telescope').setup{ file_ignore_patterns = {"node_modules"} }
 EOF
 
+lua << EOF
+require('tabnine').setup({
+  disable_auto_comment=true,
+  accept_keymap="<Tab>",
+  dismiss_keymap = "<C-]>",
+  debounce_ms = 300,
+  suggestion_color = {gui = "#808080", cterm = 244},
+  execlude_filetypes = {"TelescopePrompt"}
+})
+EOF
+
 let g:transparent_enabled = v:true
 
 map <C-L> :tabn<CR>
@@ -160,3 +173,7 @@ map <C-H> :tabp<CR>
 map <leader>n :tabnew<CR>
 map <leader>c :tabc<cr>
 map <leader>r <cmd>CocCommand tsserver.findAllFileReferences<CR>
+
+lua << EOF
+vim.api.nvim_set_keymap("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", { noremap = true })
+EOF
