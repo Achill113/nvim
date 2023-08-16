@@ -1,8 +1,13 @@
 call plug#begin()
 
+Plug 'neovim/nvim-lspconfig'
+Plug 'hrsh7th/cmp-nvim-lsp'
+Plug 'hrsh7th/cmp-buffer'
+Plug 'hrsh7th/cmp-path'
+Plug 'hrsh7th/cmp-cmdline'
+Plug 'hrsh7th/nvim-cmp'
 Plug 'ryanoasis/vim-devicons'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
-Plug 'neovim/nvim-lspconfig'
 Plug 'folke/lsp-colors.nvim'
 Plug 'preservim/nerdtree'
 Plug 'Xuyuanp/nerdtree-git-plugin'
@@ -25,8 +30,12 @@ Plug 'xiyaowong/nvim-transparent'
 Plug 'tpope/vim-fugitive'
 Plug 'codota/tabnine-nvim', { 'do': './dl_binaries.sh' }
 Plug 'HerringtonDarkholme/yats.vim'
+Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+Plug 'williamboman/mason.nvim'
 
 call plug#end()
+
+source $HOME/.config/nvim/plug-config/lspconfig.lua
 
 " Use tab for trigger completion with characters ahead and navigate.
 " NOTE: There's always complete item selected by default, you may want to enable
@@ -158,7 +167,7 @@ EOF
 lua << EOF
 require('tabnine').setup({
   disable_auto_comment=true,
-  accept_keymap="<Tab>",
+  accept_keymap="<Right>",
   dismiss_keymap = "<C-]>",
   debounce_ms = 300,
   suggestion_color = {gui = "#808080", cterm = 244},
