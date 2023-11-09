@@ -15,8 +15,8 @@ local function on_attach(client, bufnr)
     -- vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>lr", "<cmd>lua vim.lsp.buf.rename()<CR>", opts)
     vim.api.nvim_buf_set_keymap(bufnr, "n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts)
     -- vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>f", "<cmd>lua vim.diagnostic.open_float()<CR>", opts)
-    vim.api.nvim_buf_set_keymap(bufnr, "n", "[d", '<cmd>lua vim.diagnostic.goto_prev({ border = "single" })<CR>', opts)
-    vim.api.nvim_buf_set_keymap(bufnr, "n", "]d", '<cmd>lua vim.diagnostic.goto_next({ border = "single" })<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, "n", "[d", '<cmd>lua vim.diagnostic.goto_prev({ border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" } })<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, "n", "]d", '<cmd>lua vim.diagnostic.goto_next({ border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" } })<CR>', opts)
     -- vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>q", "<cmd>lua vim.diagnostic.setloclist()<CR>", opts)
     vim.cmd [[ command! Format execute 'lua vim.lsp.buf.formatting()' ]]
 end
@@ -50,7 +50,7 @@ vim.diagnostic.config({
     float = {
         focusable = false,
         style = "minimal",
-        border = "single",
+        border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
         source = "always",
         header = "Diagnostics:",
         -- prefix = function (d, i, win_total)
@@ -117,7 +117,7 @@ local function set_signs(bufnr)
         float = {
             focusable = false,
             style = "minimal",
-            border = "single",
+            border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
             source = "always",
             header = "",
             prefix = "",
@@ -131,11 +131,11 @@ function vim.diagnostic.show(namespace, bufnr, ...)
 end
 
 vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
-    border = "single",
+    border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
 })
 
 vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-    border = "single",
+    border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
 })
 
 
