@@ -1,11 +1,15 @@
 call plug#begin()
 
 Plug 'neovim/nvim-lspconfig'
+Plug 'hrsh7th/vim-vsnip'
+Plug 'hrsh7th/vim-vsnip-integ'
 Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'hrsh7th/cmp-buffer'
 Plug 'hrsh7th/cmp-path'
 Plug 'hrsh7th/cmp-cmdline'
 Plug 'hrsh7th/nvim-cmp'
+Plug 'hrsh7th/cmp-vsnip'
+Plug 'hrsh7th/vim-vsnip'
 Plug 'ryanoasis/vim-devicons'
 Plug 'folke/lsp-colors.nvim'
 Plug 'preservim/nerdtree'
@@ -35,6 +39,7 @@ Plug 'williamboman/mason.nvim'
 call plug#end()
 
 source $HOME/.config/nvim/plug-config/lspconfig.lua
+source $HOME/.config/nvim/plug-config/cmp.lua
 
 function! CheckBackspace() abort
   let col = col('.') - 1
