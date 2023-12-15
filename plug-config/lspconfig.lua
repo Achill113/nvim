@@ -115,7 +115,7 @@ local function set_signs(bufnr)
         underline = true,
         severity_sort = true,
         float = {
-            focusable = false,
+            focusable = true,
             style = "minimal",
             border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
             source = "always",
@@ -159,3 +159,11 @@ for _, lsp in ipairs(servers) do
     capabilities = capabilities,
   }
 end
+
+local function show_diagnostics()
+  vim.diagnostic.open_float()
+end
+
+vim.api.nvim_create_autocmd("CursorHold", {
+    callback = show_diagnostics
+})
