@@ -4,14 +4,14 @@ lsp.preset("recommended")
 
 lsp.ensure_installed({
   'cssls',
-    'html',
-    'dockerls',
-    'gopls',
-    'tailwindcss',
-    'vimls',
-    'tsserver',
-    -- 'csharp_ls',
-    'rust_analyzer',
+   'html',
+   'dockerls',
+   'gopls',
+   'tailwindcss',
+   'vimls',
+   'tsserver',
+   -- 'csharp_ls',
+   'rust_analyzer',
 })
 
 -- Fix Undefined global 'vim'
