@@ -71,6 +71,7 @@ return require('packer').startup(function(use)
           }
     }
 
+    use "nvim-lua/plenary.nvim"
     use {
       "pmizio/typescript-tools.nvim",
       requires = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
