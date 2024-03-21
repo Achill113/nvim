@@ -38,6 +38,7 @@ return require('packer').startup(function(use)
   use("nvim-treesitter/playground")
   use("theprimeagen/harpoon")
   use("theprimeagen/refactoring.nvim")
+  use("mbbill/undotree")
 
   use 'numToStr/Comment.nvim'
   use 'xiyaowong/nvim-transparent'
