@@ -35,6 +35,7 @@ Plug 'codota/tabnine-nvim', { 'do': './dl_binaries.sh' }
 Plug 'HerringtonDarkholme/yats.vim'
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 Plug 'williamboman/mason.nvim'
+Plug 'williamboman/mason-lspconfig.nvim'
 
 call plug#end()
 
