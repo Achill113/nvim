@@ -13,7 +13,6 @@ lsp.ensure_installed({
    'omnisharp',
    'rust_analyzer',
    'eslint-lsp',
-   'prettier'
 })
 
 -- Fix Undefined global 'vim'
