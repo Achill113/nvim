@@ -44,7 +44,15 @@ return require('packer').startup(function(use)
   use 'numToStr/Comment.nvim'
   use 'xiyaowong/nvim-transparent'
   use 'tpope/vim-fugitive'
+
   use{'codota/tabnine-nvim', { run = './dl_binaries.sh' }}
+  use {
+    'github/copilot.vim',
+    {
+      branch = 'release'
+    }
+  }
+
   use 'HerringtonDarkholme/yats.vim'
   use{'fatih/vim-go', { run = ':GoUpdateBinaries' }}
 
