@@ -12,7 +12,12 @@ return require('packer').startup(function(use)
   use 'Xuyuanp/nerdtree-git-plugin'
   use 'ryanoasis/vim-devicons'
   use 'tiagofumo/vim-nerdtree-syntax-highlight'
-  use 'eslint/eslint'
+  use 'editorconfig/editorconfig-vim'
+  -- use 'MunifTanjim/prettier.nvim'
+  use 'prettier/vim-prettier'
+  use 'MunifTanjim/eslint.nvim'
+  use 'sbdchd/neoformat'
+
   use {
     'nvim-lualine/lualine.nvim',
     requires = { 'nvim-tree/nvim-web-devicons', opt = true }
@@ -76,10 +81,11 @@ return require('packer').startup(function(use)
               -- Snippets
               {'L3MON4D3/LuaSnip'},
               {'rafamadriz/friendly-snippets'},
+
+              {'b0o/schemastore.nvim'}
           }
     }
 
-    use "nvim-lua/plenary.nvim"
     use {
       "pmizio/typescript-tools.nvim",
       requires = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
@@ -88,4 +94,5 @@ return require('packer').startup(function(use)
       end,
     }
 
+  use { 'jose-elias-alvarez/null-ls.nvim' }
 end)

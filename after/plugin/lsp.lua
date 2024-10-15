@@ -12,7 +12,8 @@ lsp.ensure_installed({
    'tsserver',
    'omnisharp',
    'rust_analyzer',
-   'angularls'
+   'angularls',
+   'eslint'
 })
 
 -- Fix Undefined global 'vim'
@@ -68,3 +69,17 @@ lsp.setup()
 vim.diagnostic.config({
     virtual_text = true
 })
+
+-- VSCode Settings
+require'lspconfig'.jsonls.setup {
+  cmd = {"vscode-json-languageserver", "--stdio"},
+  filetypes = {"json", "jsonc"},
+  settings = {
+    json = {
+      schemas = require'schemastore'.json.schemas(), -- Optional: Get schemas for JSON settings
+    },
+  },
+  on_attach = function(client, bufnr)
+    -- Set up any additional buffer-specific keymaps or settings here
+  end
+}
