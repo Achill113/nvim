@@ -14,3 +14,7 @@ are not installed on the current machine.
 - Golang
 - TypeScript
 - Rust
+
+## Debugger (DAP)
+To configure DAP for Rust/C++ install [Codelldb](https://github.com/vadimcn/codelldb/releases) and set the CODELLDB_PATH
+environment variable to that path of codelldb.

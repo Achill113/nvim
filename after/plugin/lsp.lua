@@ -1,4 +1,5 @@
 local lsp = require("lsp-zero")
+local lspconfig = require("lspconfig")
 
 lsp.preset("recommended")
 
@@ -15,6 +16,38 @@ lsp.ensure_installed({
    'angularls',
    'eslint'
 })
+
+-- rust_analyzer
+lspconfig.rust_analyzer.setup {
+    on_attach = on_attach,
+    settings = {
+        ["rust-analyzer"] = {
+            imports = {
+                granularity = {
+                    group = "module",
+                },
+                prefix = "self",
+            },
+            cargo = {
+                buildScripts = {
+                    enable = true,
+                },
+            },
+            -- procMacro = {
+            --   ignored = {
+            --       leptos_macro = {
+            --           -- optional: --
+            --           -- "component",
+            --           "server",
+            --       },
+            --   },
+            -- },
+            checkOnSave = {
+              command = "clippy",
+            },
+        }
+    }
+}
 
 -- Fix Undefined global 'vim'
 lsp.nvim_workspace()

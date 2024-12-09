@@ -95,4 +95,14 @@ return require('packer').startup(function(use)
     }
 
   use { 'jose-elias-alvarez/null-ls.nvim' }
+
+  use { "rcarriga/nvim-dap-ui", requires = {"mfussenegger/nvim-dap", "nvim-neotest/nvim-nio"} }
+
+  use {
+    'mfussenegger/nvim-dap',
+    requires = {
+      'rcarriga/nvim-dap-ui',
+      'nvim-telescope/telescope-dap.nvim'
+    }
+  }
 end)
