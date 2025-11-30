@@ -94,7 +94,7 @@ return require('packer').startup(function(use)
       end,
     }
 
-  use { 'jose-elias-alvarez/null-ls.nvim' }
+  use { 'nvimtools/none-ls.nvim' }
 
   use { "rcarriga/nvim-dap-ui", requires = {"mfussenegger/nvim-dap", "nvim-neotest/nvim-nio"} }
 
