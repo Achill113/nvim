@@ -10,11 +10,11 @@ lsp.ensure_installed({
    'gopls',
    'tailwindcss',
    'vimls',
-   'tsserver',
    'omnisharp',
    'rust_analyzer',
    'angularls',
-   'eslint'
+   'eslint',
+   'ruby_lsp'
 })
 
 -- rust_analyzer
@@ -104,7 +104,7 @@ vim.diagnostic.config({
 })
 
 -- VSCode Settings
-require'lspconfig'.jsonls.setup {
+lspconfig.jsonls.setup {
   cmd = {"vscode-json-languageserver", "--stdio"},
   filetypes = {"json", "jsonc"},
   settings = {

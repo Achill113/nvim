@@ -61,6 +61,9 @@ return require('packer').startup(function(use)
   use 'HerringtonDarkholme/yats.vim'
   use{'fatih/vim-go', { run = ':GoUpdateBinaries' }}
 
+  use { 'neovim/nvim-lspconfig' }
+  use { 'williamboman/mason-lspconfig.nvim' }
+
   use {
           'VonHeikemen/lsp-zero.nvim',
           branch = 'v1.x',
