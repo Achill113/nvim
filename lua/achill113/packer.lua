@@ -108,4 +108,8 @@ return require('packer').startup(function(use)
       'nvim-telescope/telescope-dap.nvim'
     }
   }
+
+  use({
+    "stevearc/conform.nvim",
+  })
 end)

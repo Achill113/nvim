@@ -1,118 +1,133 @@
-local lsp = require("lsp-zero")
-local lspconfig = require("lspconfig")
+-- =========================
+-- LSP SETUP (Neovim 0.11+)
+-- =========================
 
-lsp.preset("recommended")
-
-lsp.ensure_installed({
-  'cssls',
-   'html',
-   'dockerls',
-   'gopls',
-   'tailwindcss',
-   'vimls',
-   'omnisharp',
-   'rust_analyzer',
-   'angularls',
-   'eslint',
-   'ruby_lsp'
-})
-
--- rust_analyzer
-lspconfig.rust_analyzer.setup {
-    on_attach = on_attach,
-    settings = {
-        ["rust-analyzer"] = {
-            imports = {
-                granularity = {
-                    group = "module",
-                },
-                prefix = "self",
-            },
-            cargo = {
-                buildScripts = {
-                    enable = true,
-                },
-            },
-            -- procMacro = {
-            --   ignored = {
-            --       leptos_macro = {
-            --           -- optional: --
-            --           -- "component",
-            --           "server",
-            --       },
-            --   },
-            -- },
-            checkOnSave = {
-              command = "clippy",
-            },
-        }
-    }
-}
-
--- Fix Undefined global 'vim'
-lsp.nvim_workspace()
-
-
-local cmp = require('cmp')
-local cmp_select = {behavior = cmp.SelectBehavior.Select}
-local cmp_mappings = lsp.defaults.cmp_mappings({
-  ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
-  ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
-  ['<C-y>'] = cmp.mapping.confirm({ select = true }),
-  ["<C-Space>"] = cmp.mapping.complete(),
-})
-
-cmp_mappings['<Tab>'] = nil
-cmp_mappings['<S-Tab>'] = nil
-
-lsp.setup_nvim_cmp({
-  mapping = cmp_mappings
-})
-
-lsp.set_preferences({
-    suggest_lsp_servers = false,
-    sign_icons = {
-        error = 'E',
-        warn = 'W',
-        hint = 'H',
-        info = 'I'
-    }
-})
-
-lsp.on_attach(function(client, bufnr)
-  local opts = {buffer = bufnr, remap = false}
-
-  vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, opts)
-  vim.keymap.set("n", "K", function() vim.lsp.buf.hover() end, opts)
-  vim.keymap.set("n", "<leader>vws", function() vim.lsp.buf.workspace_symbol() end, opts)
-  vim.keymap.set("n", "<leader>vd", function() vim.diagnostic.open_float() end, opts)
-  vim.keymap.set("n", "[d", function() vim.diagnostic.goto_next() end, opts)
-  vim.keymap.set("n", "]d", function() vim.diagnostic.goto_prev() end, opts)
-  vim.keymap.set({"n", "v"}, "<C-a>", function() vim.lsp.buf.code_action() end, opts)
-  vim.keymap.set("n", "<leader>rr", function() vim.lsp.buf.references() end, opts)
-  vim.keymap.set("n", "<leader>rn", function() vim.lsp.buf.rename() end, opts)
-  vim.keymap.set("i", "<C-h>", function() vim.lsp.buf.signature_help() end, opts)
-  vim.keymap.set('n', '<leader>f', function()
-    vim.lsp.buf.format { async = true }
-  end, opts)
-end)
-
-lsp.setup()
-
+-- -------------------------
+-- Diagnostic configuration
+-- -------------------------
 vim.diagnostic.config({
-    virtual_text = true
+  virtual_text = true,
+  signs = true,
+  underline = true,
+  update_in_insert = false,
+  severity_sort = true,
 })
 
--- VSCode Settings
-lspconfig.jsonls.setup {
-  cmd = {"vscode-json-languageserver", "--stdio"},
-  filetypes = {"json", "jsonc"},
+-- -------------------------
+-- Global on_attach
+-- -------------------------
+local on_attach = function(_, bufnr)
+  local opts = { buffer = bufnr, remap = false }
+
+  vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+  vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+  vim.keymap.set("n", "<leader>vws", vim.lsp.buf.workspace_symbol, opts)
+  vim.keymap.set("n", "<leader>vd", vim.diagnostic.open_float, opts)
+  vim.keymap.set("n", "[d", vim.diagnostic.goto_next, opts)
+  vim.keymap.set("n", "]d", vim.diagnostic.goto_prev, opts)
+  vim.keymap.set({ "n", "v" }, "<C-a>", vim.lsp.buf.code_action, opts)
+  vim.keymap.set("n", "<leader>rr", vim.lsp.buf.references, opts)
+  vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
+  vim.keymap.set("i", "<C-h>", vim.lsp.buf.signature_help, opts)
+
+  vim.keymap.set("n", "<leader>f", function()
+    vim.lsp.buf.format({ async = true })
+  end, opts)
+end
+
+-- -------------------------
+-- LSP Servers
+-- -------------------------
+
+-- Rust
+vim.lsp.config("rust_analyzer", {
+  on_attach = on_attach,
   settings = {
-    json = {
-      schemas = require'schemastore'.json.schemas(), -- Optional: Get schemas for JSON settings
+    ["rust-analyzer"] = {
+      imports = {
+        granularity = { group = "module" },
+        prefix = "self",
+      },
+      cargo = {
+        buildScripts = { enable = true },
+      },
+      checkOnSave = {
+        command = "clippy",
+      },
     },
   },
-  on_attach = function(client, bufnr)
-    -- Set up any additional buffer-specific keymaps or settings here
-  end
-}
+})
+
+-- Go
+vim.lsp.config("gopls", {
+  on_attach = on_attach,
+})
+
+-- Ruby
+vim.lsp.config("ruby_lsp", {
+  on_attach = on_attach,
+})
+
+-- HTML / CSS / Tailwind
+vim.lsp.config("html", { on_attach = on_attach })
+vim.lsp.config("cssls", { on_attach = on_attach })
+vim.lsp.config("tailwindcss", { on_attach = on_attach })
+
+-- Docker
+vim.lsp.config("dockerls", { on_attach = on_attach })
+
+-- Vimscript
+vim.lsp.config("vimls", { on_attach = on_attach })
+
+-- ESLint
+vim.lsp.config("eslint", { on_attach = on_attach })
+
+-- Angular
+vim.lsp.config("angularls", { on_attach = on_attach })
+
+-- JSON (VSCode server)
+vim.lsp.config("jsonls", {
+  on_attach = on_attach,
+  settings = {
+    json = {
+      schemas = require("schemastore").json.schemas(),
+      validate = { enable = true },
+    },
+  },
+})
+
+-- -------------------------
+-- Completion (nvim-cmp)
+-- -------------------------
+local cmp = require("cmp")
+
+cmp.setup({
+  mapping = {
+    ["<C-n>"] = cmp.mapping.select_next_item(),
+    ["<C-p>"] = cmp.mapping.select_prev_item(),
+    ["<C-y>"] = cmp.mapping.confirm({ select = true }),
+    ["<C-Space>"] = cmp.mapping.complete(),
+  },
+})
+
+-- -------------------------
+-- Formatting (Stylua etc.)
+-- -------------------------
+require("conform").setup({
+  formatters_by_ft = {
+    lua = { "stylua" },
+    json = { "jq" },
+    javascript = { "prettier" },
+    typescript = { "prettier" },
+    css = { "prettier" },
+    html = { "prettier" },
+  },
+})
+
+-- Optional: format on save
+vim.api.nvim_create_autocmd("BufWritePre", {
+  callback = function(args)
+    require("conform").format({ bufnr = args.buf })
+  end,
+})
+
