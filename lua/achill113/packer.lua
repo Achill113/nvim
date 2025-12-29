@@ -4,6 +4,7 @@
 vim.cmd [[packadd packer.nvim]]
 
 return require('packer').startup(function(use)
+  use "christoomey/vim-tmux-navigator"
   -- Packer can manage itself
   use 'wbthomason/packer.nvim'
   use 'ryanoasis/vim-devicons'
