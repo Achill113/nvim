@@ -23,7 +23,7 @@ return require('packer').startup(function(use)
     'nvim-lualine/lualine.nvim',
     requires = { 'nvim-tree/nvim-web-devicons', opt = true }
   }
-  use 'folke/tokyonight.nvim'
+  use { "catppuccin/nvim", as = "catppuccin" }
   use 'caenrique/nvim-toggle-terminal'
   use 'kien/ctrlp.vim'
   use 'dyng/ctrlsf.vim'
@@ -113,4 +113,48 @@ return require('packer').startup(function(use)
   use({
     "stevearc/conform.nvim",
   })
+
+
+  use {
+    "folke/noice.nvim",
+    requires = {
+      "MunifTanjim/nui.nvim",
+      "rcarriga/nvim-notify",
+    },
+    config = function()
+      require("noice").setup({
+        cmdline = {
+          enabled = true,
+          view = "cmdline_popup",
+        },
+
+        messages = {
+          enabled = true,
+        },
+
+        popupmenu = {
+          enabled = true,
+        },
+
+        lsp = {
+          progress = {
+            enabled = true,
+          },
+          hover = {
+            enabled = true,
+          },
+          signature = {
+            enabled = true,
+          },
+        },
+
+        presets = {
+          bottom_search = true, -- keep `/` at bottom
+          command_palette = true, -- aligns cmdline + popupmenu
+          long_message_to_split = true,
+          lsp_doc_border = true,
+        },
+      })
+    end
+  }
 end)

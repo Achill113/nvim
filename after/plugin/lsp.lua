@@ -102,12 +102,34 @@ vim.lsp.config("jsonls", {
 local cmp = require("cmp")
 
 cmp.setup({
-  mapping = {
+  sources = {
+    { name = "nvim_lsp" },
+    { name = "luasnip" },
+    { name = "buffer" },
+    { name = "path" },
+  },
+  mapping = cmp.mapping.preset.insert({
     ["<C-n>"] = cmp.mapping.select_next_item(),
     ["<C-p>"] = cmp.mapping.select_prev_item(),
     ["<C-y>"] = cmp.mapping.confirm({ select = true }),
+    ["<CR>"] = cmp.mapping.confirm({ select = false }),
+    ["<Esc>"] = cmp.mapping.abort(),
     ["<C-Space>"] = cmp.mapping.complete(),
-  },
+    ["<Tab>"] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_next_item()
+      else
+        fallback()
+      end
+    end, { "i", "s" }),
+    ["<S-Tab>"] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_prev_item()
+      else
+        fallback()
+      end
+    end, { "i", "s" }),
+  }),
 })
 
 -- -------------------------
