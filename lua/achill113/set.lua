@@ -26,3 +26,6 @@ vim.opt.updatetime = 50
 vim.opt.colorcolumn = "80"
 
 vim.api.nvim_set_var('import_sort_auto', 1)
+
+-- Disable default vim-tmux-navigator mappings to avoid conflicts with custom keybindings
+vim.g.tmux_navigator_no_mappings = 1
