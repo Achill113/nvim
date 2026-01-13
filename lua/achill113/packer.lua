@@ -162,4 +162,12 @@ return require('packer').startup(function(use)
 
   use 'akinsho/git-conflict.nvim'
   use 'lewis6991/gitsigns.nvim'
+
+  use {
+    'coder/claudecode.nvim',
+    requires = { 'folke/snacks.nvim' },
+    config = function()
+      require('claudecode').setup()
+    end,
+  }
 end)
