@@ -65,11 +65,6 @@ vim.lsp.config("gopls", {
   on_attach = on_attach,
 })
 
--- Ruby
-vim.lsp.config("ruby_lsp", {
-  on_attach = on_attach,
-})
-
 -- HTML / CSS / Tailwind
 vim.lsp.config("html", { on_attach = on_attach })
 vim.lsp.config("cssls", { on_attach = on_attach })
