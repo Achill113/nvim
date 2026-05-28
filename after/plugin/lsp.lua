@@ -29,6 +29,7 @@ local on_attach = function(_, bufnr)
   vim.keymap.set("n", "<leader>rr", vim.lsp.buf.references, opts)
   vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
   vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
+  vim.keymap.set("n", "<F2>", vim.lsp.buf.rename, opts)
   vim.keymap.set("i", "<C-h>", vim.lsp.buf.signature_help, opts)
 
   vim.keymap.set("n", "<leader>f", function()

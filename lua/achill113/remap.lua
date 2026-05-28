@@ -46,6 +46,3 @@ vim.keymap.set("n", "<C-f>", ":NERDTreeFind<CR>")
 
 -- Terminal
 vim.api.nvim_set_keymap('n', '<leader>t', ':terminal<CR>', { noremap = true, silent = true })
-
--- Git
-vim.keymap.set("n", "<C-b>", ":Gitsigns toggle_current_line_blame<CR>")

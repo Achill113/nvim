@@ -38,13 +38,9 @@ return require('packer').startup(function(use)
 
   use({
     'nvim-treesitter/nvim-treesitter',
-    branch = 'master',
-    run = function()
-      local ts_update = require('nvim-treesitter.install').update({ with_sync = true })
-      ts_update()
-    end,
+    branch = 'main',
+    run = ':TSUpdate',
   })
-  use("nvim-treesitter/playground")
   use("theprimeagen/harpoon")
   use("theprimeagen/refactoring.nvim")
   use("mbbill/undotree")
@@ -124,6 +120,9 @@ return require('packer').startup(function(use)
       "rcarriga/nvim-notify",
     },
     config = function()
+      require("notify").setup({
+        background_colour = "#000000",
+      })
       require("noice").setup({
         cmdline = {
           enabled = true,
