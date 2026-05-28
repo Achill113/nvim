@@ -17,7 +17,6 @@ require("mason-lspconfig").setup({
     "rust_analyzer",
     "angularls",
     "eslint",
-    "ruby_lsp",
     "jsonls",
   },
   automatic_installation = true,
