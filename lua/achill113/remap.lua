@@ -4,7 +4,6 @@ vim.keymap.set("n", "<C-l>", ":tabn<CR>")
 vim.keymap.set("n", "<C-h>", ":tabp<CR>")
 vim.keymap.set("n", "<leader>n", ":tabnew<CR>")
 vim.keymap.set("n", "<leader>c", ":tabc<cr>")
-vim.keymap.set("n", "<leader>r", "<cmd>CocCommand tsserver.findAllFileReferences<CR>")
 
 vim.keymap.set("n", "<leader>x", ":%s/\\r//<CR>")
 

@@ -4,7 +4,8 @@ vim.opt.relativenumber = true
 vim.opt.encoding="UTF-8"
 
 vim.opt.tw = 79
-vim.opt.wrap = linebreak
+vim.opt.wrap = true
+vim.opt.linebreak = true
 
 vim.opt.hlsearch = false
 vim.opt.incsearch = true
@@ -25,7 +26,4 @@ vim.opt.updatetime = 50
 
 vim.opt.colorcolumn = "80"
 
-vim.api.nvim_set_var('import_sort_auto', 1)
-
--- Disable default vim-tmux-navigator mappings to avoid conflicts with custom keybindings
-vim.g.tmux_navigator_no_mappings = 1
+vim.g.go_gopls_enabled = 0

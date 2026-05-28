@@ -4,169 +4,140 @@
 vim.cmd [[packadd packer.nvim]]
 
 return require('packer').startup(function(use)
-  use "christoomey/vim-tmux-navigator"
-  -- Packer can manage itself
   use 'wbthomason/packer.nvim'
+
+  -- UI
   use 'ryanoasis/vim-devicons'
   use 'folke/lsp-colors.nvim'
-  use 'preservim/nerdtree'
-  use 'Xuyuanp/nerdtree-git-plugin'
-  use 'ryanoasis/vim-devicons'
-  use 'tiagofumo/vim-nerdtree-syntax-highlight'
-  use 'editorconfig/editorconfig-vim'
-  -- use 'MunifTanjim/prettier.nvim'
-  use 'prettier/vim-prettier'
-  use 'MunifTanjim/eslint.nvim'
-  use 'sbdchd/neoformat'
-
+  use { "catppuccin/nvim", as = "catppuccin" }
+  use 'xiyaowong/nvim-transparent'
   use {
     'nvim-lualine/lualine.nvim',
     requires = { 'nvim-tree/nvim-web-devicons', opt = true }
   }
-  use { "catppuccin/nvim", as = "catppuccin" }
-  use 'caenrique/nvim-toggle-terminal'
-  use 'kien/ctrlp.vim'
-  use 'dyng/ctrlsf.vim'
-  use 'ruanyl/vim-sort-imports'
-  use{'nvim-telescope/telescope-fzf-native.nvim', { run = 'make' }}
-  use 'nvim-lua/plenary.nvim'
 
+  -- File tree
+  use 'preservim/nerdtree'
+  use 'Xuyuanp/nerdtree-git-plugin'
+  use 'tiagofumo/vim-nerdtree-syntax-highlight'
+
+  -- Editor utilities
+  use 'editorconfig/editorconfig-vim'
+  use 'sbdchd/neoformat'
+  use 'numToStr/Comment.nvim'
+  use 'caenrique/nvim-toggle-terminal'
+  use 'dyng/ctrlsf.vim'
+  use 'mbbill/undotree'
+
+  -- Telescope
+  use 'nvim-lua/plenary.nvim'
+  use { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
   use {
     'nvim-telescope/telescope.nvim', tag = '0.1.6',
-    requires = { {'nvim-lua/plenary.nvim'} }
+    requires = { { 'nvim-lua/plenary.nvim' } }
   }
 
-  use({
+  -- Treesitter
+  use {
     'nvim-treesitter/nvim-treesitter',
     branch = 'main',
     run = ':TSUpdate',
-  })
-  use("theprimeagen/harpoon")
-  use("theprimeagen/refactoring.nvim")
-  use("mbbill/undotree")
+  }
 
-  use 'numToStr/Comment.nvim'
-  use 'xiyaowong/nvim-transparent'
+  -- Theprimeagen
+  use 'theprimeagen/harpoon'
+  use 'theprimeagen/refactoring.nvim'
+
+  -- Git
   use 'tpope/vim-fugitive'
-
-  use{'codota/tabnine-nvim', { run = './dl_binaries.sh' }}
-  use {
-    'github/copilot.vim',
-    {
-      branch = 'release'
-    }
-  }
-
-  use 'HerringtonDarkholme/yats.vim'
-  use{'fatih/vim-go', { run = ':GoUpdateBinaries' }}
-
-  use { 'neovim/nvim-lspconfig' }
-  use { 'williamboman/mason-lspconfig.nvim' }
-
-  use {
-          'VonHeikemen/lsp-zero.nvim',
-          branch = 'v1.x',
-          requires = {
-              -- LSP Support
-              {'neovim/nvim-lspconfig'},
-              {'williamboman/mason.nvim'},
-              {'williamboman/mason-lspconfig.nvim'},
-
-              -- Autocompletion
-              {'hrsh7th/nvim-cmp'},
-              {'hrsh7th/cmp-buffer'},
-              {'hrsh7th/cmp-path'},
-              {'saadparwaiz1/cmp_luasnip'},
-              {'hrsh7th/cmp-nvim-lsp'},
-              {'hrsh7th/cmp-nvim-lua'},
-
-              -- Snippets
-              {'L3MON4D3/LuaSnip'},
-              {'rafamadriz/friendly-snippets'},
-
-              {'b0o/schemastore.nvim'}
-          }
-    }
-
-    use {
-      "pmizio/typescript-tools.nvim",
-      requires = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
-      config = function()
-        require("typescript-tools").setup {}
-      end,
-    }
-
-  use { 'nvimtools/none-ls.nvim' }
-
-  use { "rcarriga/nvim-dap-ui", requires = {"mfussenegger/nvim-dap", "nvim-neotest/nvim-nio"} }
-
-  use {
-    'mfussenegger/nvim-dap',
-    requires = {
-      'rcarriga/nvim-dap-ui',
-      'nvim-telescope/telescope-dap.nvim'
-    }
-  }
-
-  use({
-    "stevearc/conform.nvim",
-  })
-
-
-  use {
-    "folke/noice.nvim",
-    requires = {
-      "MunifTanjim/nui.nvim",
-      "rcarriga/nvim-notify",
-    },
-    config = function()
-      require("notify").setup({
-        background_colour = "#000000",
-      })
-      require("noice").setup({
-        cmdline = {
-          enabled = true,
-          view = "cmdline_popup",
-        },
-
-        messages = {
-          enabled = true,
-        },
-
-        popupmenu = {
-          enabled = true,
-        },
-
-        lsp = {
-          progress = {
-            enabled = true,
-          },
-          hover = {
-            enabled = true,
-          },
-          signature = {
-            enabled = true,
-          },
-        },
-
-        presets = {
-          bottom_search = true, -- keep `/` at bottom
-          command_palette = true, -- aligns cmdline + popupmenu
-          long_message_to_split = true,
-          lsp_doc_border = true,
-        },
-      })
-    end
-  }
-
   use 'akinsho/git-conflict.nvim'
   use 'lewis6991/gitsigns.nvim'
 
+  -- AI
+  use {
+    'github/copilot.vim',
+    { branch = 'release' },
+  }
   use {
     'coder/claudecode.nvim',
     requires = { 'folke/snacks.nvim' },
     config = function()
       require('claudecode').setup()
+    end,
+  }
+
+  -- Language-specific
+  use 'HerringtonDarkholme/yats.vim'
+  use { 'fatih/vim-go', { run = ':GoUpdateBinaries' } }
+
+  -- LSP
+  use 'neovim/nvim-lspconfig'
+  use 'williamboman/mason.nvim'
+  use 'williamboman/mason-lspconfig.nvim'
+  use 'b0o/schemastore.nvim'
+  use {
+    'pmizio/typescript-tools.nvim',
+    requires = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
+    config = function()
+      require('typescript-tools').setup {}
+    end,
+  }
+
+  -- Completion
+  use 'hrsh7th/nvim-cmp'
+  use 'hrsh7th/cmp-buffer'
+  use 'hrsh7th/cmp-path'
+  use 'hrsh7th/cmp-nvim-lsp'
+  use 'hrsh7th/cmp-nvim-lua'
+  use 'saadparwaiz1/cmp_luasnip'
+
+  -- Snippets
+  use 'L3MON4D3/LuaSnip'
+  use 'rafamadriz/friendly-snippets'
+
+  -- Formatting
+  use 'stevearc/conform.nvim'
+
+  -- DAP
+  use {
+    'mfussenegger/nvim-dap',
+    requires = {
+      'rcarriga/nvim-dap-ui',
+      'nvim-neotest/nvim-nio',
+      'nvim-telescope/telescope-dap.nvim',
+    },
+  }
+
+  -- UI: cmdline / messages / notifications
+  use {
+    'folke/noice.nvim',
+    requires = {
+      'MunifTanjim/nui.nvim',
+      'rcarriga/nvim-notify',
+    },
+    config = function()
+      require('notify').setup({
+        background_colour = '#000000',
+      })
+      require('noice').setup({
+        cmdline = {
+          enabled = true,
+          view = 'cmdline_popup',
+        },
+        messages = { enabled = true },
+        popupmenu = { enabled = true },
+        lsp = {
+          progress = { enabled = true },
+          hover = { enabled = true },
+          signature = { enabled = true },
+        },
+        presets = {
+          bottom_search = true,
+          command_palette = true,
+          long_message_to_split = true,
+          lsp_doc_border = true,
+        },
+      })
     end,
   }
 end)

@@ -14,7 +14,6 @@ require("mason-lspconfig").setup({
     "gopls",
     "tailwindcss",
     "vimls",
-    "omnisharp",
     "rust_analyzer",
     "angularls",
     "eslint",
