@@ -15,6 +15,22 @@ return require('packer').startup(function(use)
     'nvim-lualine/lualine.nvim',
     requires = { 'nvim-tree/nvim-web-devicons', opt = true }
   }
+  use {
+    'akinsho/bufferline.nvim',
+    tag = '*',
+    requires = 'nvim-tree/nvim-web-devicons',
+  }
+  use 'Bekaboo/dropbar.nvim'
+  use 'folke/which-key.nvim'
+  use {
+    'goolord/alpha-nvim',
+    requires = { 'nvim-tree/nvim-web-devicons' },
+  }
+  use 'lukas-reineke/indent-blankline.nvim'
+  use {
+    'folke/trouble.nvim',
+    requires = { 'nvim-tree/nvim-web-devicons' },
+  }
 
   -- File tree
   use 'preservim/nerdtree'
