@@ -75,8 +75,8 @@ return require('packer').startup(function(use)
   }
 
   -- Theprimeagen
-  use 'theprimeagen/harpoon'
-  use 'theprimeagen/refactoring.nvim'
+  use 'ThePrimeagen/harpoon'
+  use 'ThePrimeagen/refactoring.nvim'
 
   -- Git
   use 'tpope/vim-fugitive'
