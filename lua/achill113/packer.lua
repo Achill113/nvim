@@ -29,6 +29,20 @@ return require('packer').startup(function(use)
   use 'dyng/ctrlsf.vim'
   use 'mbbill/undotree'
 
+  -- Markdown
+  use {
+    'iamcco/markdown-preview.nvim',
+    run = function() vim.fn['mkdp#util#install']() end,
+    ft = { 'markdown' },
+  }
+  use {
+    'MeanderingProgrammer/render-markdown.nvim',
+    requires = {
+      'nvim-treesitter/nvim-treesitter',
+      'nvim-tree/nvim-web-devicons',
+    },
+  }
+
   -- Telescope
   use 'nvim-lua/plenary.nvim'
   use { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
