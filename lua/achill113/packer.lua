@@ -59,11 +59,8 @@ return require('packer').startup(function(use)
     { branch = 'release' },
   }
   use {
-    'coder/claudecode.nvim',
-    requires = { 'folke/snacks.nvim' },
-    config = function()
-      require('claudecode').setup()
-    end,
+    'greggh/claude-code.nvim',
+    requires = { 'nvim-lua/plenary.nvim' },
   }
 
   -- Language-specific
