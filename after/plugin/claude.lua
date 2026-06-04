@@ -20,7 +20,7 @@ require('claude-code').setup({
     pushd_cmd = 'pushd',
     popd_cmd = 'popd',
   },
-  command = 'claude',
+  command = 'claude --dangerously-skip-permissions',
   command_variants = {
     continue = '--continue',
     resume = '--resume',
