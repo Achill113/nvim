@@ -1,3 +1,8 @@
+-- Leader is the default backslash, but lazy.nvim resolves `keys` specs against
+-- these at startup, so they have to be set before it loads.
+vim.g.mapleader = "\\"
+vim.g.maplocalleader = "\\"
+
 vim.opt.nu = true
 vim.opt.relativenumber = true
 

@@ -6,19 +6,29 @@ A modern, batteries-included Neovim setup focused on TypeScript, Go, Rust, and R
 
 ## Requirements
 
-- **Neovim 0.11+** (tested on 0.12.x)
+- **Neovim 0.11+** (tested on 0.12.x) — CodeCompanion requires 0.11
 - **Git**
-- **Node.js** — Claude Code CLI, markdown preview build, copilot
+- **Node.js 22+** — Claude Code CLI, the ACP bridge, markdown preview, copilot
 - **A C compiler** (`gcc` on Linux/Windows, Xcode CLT on macOS) — treesitter parsers
-- **`ripgrep`** and **`fd`** — telescope live grep and find files
+- **`ripgrep`** and **`fd`** — telescope live grep, find files, CodeCompanion's `grep_search`
 - **A Nerd Font** — icons in lualine / bufferline / nerdtree / alpha
 - **`make`** — for plugin build steps
+- **`curl`** — CodeCompanion's HTTP adapters
+
+### AI prerequisites
+
+- **GitHub Copilot subscription** — drives ghost-text completion, Next Edit Suggestions, and CodeCompanion's inline edits. Authenticate once with `:Copilot auth`.
+- **`claude` CLI** — the agentic integration. Must be on `$PATH`.
+- **Claude subscription** — backs the CodeCompanion chat buffer via ACP.
+- **`@agentclientprotocol/claude-agent-acp`** — the ACP bridge the chat adapter spawns:
+  ```sh
+  npm install -g @agentclientprotocol/claude-agent-acp
+  ```
 
 ### Optional
 
 - **`cargo` / `rustup`** — only if you use a plugin that builds Rust extensions
 - **`codelldb`** — set `CODELLDB_PATH` env var to enable Rust/C++ debugging
-- **`claude` CLI** — for the Claude Code integration
 
 ---
 
@@ -28,26 +38,41 @@ A modern, batteries-included Neovim setup focused on TypeScript, Go, Rust, and R
 # 1. Clone into ~/.config/nvim
 git clone https://github.com/Achill113/nvim.git ~/.config/nvim
 
-# 2. Bootstrap packer
-git clone --depth 1 https://github.com/wbthomason/packer.nvim \
-  ~/.local/share/nvim/site/pack/packer/start/packer.nvim
+# 2. Install the ACP bridge for the Claude-backed chat buffer
+npm install -g @agentclientprotocol/claude-agent-acp
 
-# 3. First launch — expect errors until plugins are installed
+# 3. First launch — lazy.nvim bootstraps itself and installs everything
 nvim
-
-# 4. Inside nvim
-:PackerSync          " install all plugins
-" wait for it to finish, then restart nvim
-
-# 5. Install treesitter parsers (only needed the first time)
-:TSUpdate
-
-# 6. Install LSP servers via mason
-:Mason               " press 'i' on each server you want, or wait for
-                    " mason-lspconfig to auto-install the ensure_installed list
 ```
 
-After that, restart Neovim one more time. Everything should be ready.
+lazy.nvim clones itself on first run, so there is no manager to install by hand.
+Watch the `:Lazy` window until every plugin is green, then restart.
+
+```vim
+" 4. Install LSP servers (mason-lspconfig auto-installs the ensure_installed list,
+"    but you can add more interactively)
+:Mason
+
+" 5. One-time Copilot auth, if you have not done it on this machine before
+:Copilot auth
+```
+
+Finally, authorize the chat buffer against your Claude subscription. This is an
+interactive browser flow, so it has to be run from a shell:
+
+```sh
+claude setup-token
+```
+
+Export the token it prints so the ACP adapter can pick it up — it is read from
+the environment, deliberately, so no credential ends up in this repo:
+
+```sh
+# ~/.zshrc
+export CLAUDE_CODE_OAUTH_TOKEN="..."
+```
+
+Restart Neovim one more time and everything should be ready.
 
 ---
 
@@ -57,14 +82,16 @@ After that, restart Neovim one more time. Everything should be ready.
 ~/.config/nvim/
 ├── init.lua                       # entry point — just requires achill113
 ├── lua/achill113/
-│   ├── init.lua                   # requires set + remap
-│   ├── set.lua                    # vim.opt options and global vim.g flags
+│   ├── init.lua                   # requires set + remap + lazy
+│   ├── set.lua                    # leader, vim.opt options, global vim.g flags
 │   ├── remap.lua                  # global keymaps (no plugin dependency)
-│   └── packer.lua                 # the plugin manifest
+│   └── lazy.lua                   # bootstraps lazy.nvim and imports lua/plugins
+├── lua/plugins/                   # plugin manifest (lazy.nvim specs)
+│   ├── init.lua                   # everything non-AI
+│   └── ai.lua                     # copilot, codecompanion, claudecode + their config
 ├── after/plugin/                  # per-plugin setup, loaded after the plugin itself
 │   ├── alpha.lua                  # dashboard
 │   ├── bufferline.lua             # tab strip
-│   ├── claude.lua                 # Claude Code integration
 │   ├── colors.lua                 # catppuccin colorscheme
 │   ├── comment.lua                # Comment.nvim
 │   ├── debugger.lua               # nvim-dap + dap-ui
@@ -83,14 +110,23 @@ After that, restart Neovim one more time. Everything should be ready.
 │   ├── typescript.lua             # typescript-tools setup
 │   ├── undotree.lua               # undotree toggle
 │   └── which-key.lua              # leader popup
-└── plugin/packer_compiled.lua     # auto-generated by packer (do not edit)
+└── lazy-lock.json                 # pinned plugin revisions — commit this
 ```
+
+Plugin **specs** live in `lua/plugins/`; plugin **config** stays in `after/plugin/`,
+which is why most specs have no `config` block. `after/plugin/` is sourced by Neovim
+once `init.lua` returns, so anything configured there must already be loaded —
+hence `defaults = { lazy = false }` in `lua/achill113/lazy.lua`. The AI plugins are
+the exception: they lazy-load on `event`/`cmd`/`keys` and carry their own config in
+`lua/plugins/ai.lua`.
 
 ---
 
 ## Keymap Reference
 
-Leader is `<Space>` by default (unless overridden in `set.lua`).
+Leader is **backslash** (`\`), set explicitly in `set.lua`. So `<leader>ff` is typed
+`\ff`. It has to be assigned before lazy.nvim loads, or plugin `keys` specs resolve
+against the wrong prefix.
 
 ### Navigation
 
@@ -162,11 +198,33 @@ Leader is `<Space>` by default (unless overridden in `set.lua`).
 | Key | Action |
 | --- | --- |
 | `<C-n>` / `<C-p>` | Next / prev item |
-| `<Tab>` / `<S-Tab>` | Next / prev when menu is visible |
+| `<Tab>` | Next item if the menu is open, else accept the Copilot suggestion |
+| `<S-Tab>` | Prev item when menu is visible |
 | `<C-y>` | Confirm (auto-select if none selected) |
 | `<CR>` | Confirm (no auto-select) |
 | `<C-Space>` | Force complete |
 | `<Esc>` | Abort completion menu |
+
+`<Tab>` prefers nvim-cmp so the existing behaviour is unchanged; Copilot is only
+accepted when no completion menu is open. To make Copilot win instead, swap the
+first two branches of the `<Tab>` mapping in `after/plugin/lsp.lua`. `<M-l>` always
+accepts the Copilot suggestion regardless of what the menu is doing.
+
+### Copilot (inline completion)
+
+| Key | Mode | Action |
+| --- | --- | --- |
+| `<M-l>` | i | Accept the whole suggestion |
+| `<M-w>` | i | Accept one word |
+| `<M-]>` / `<M-[>` | i | Next / previous suggestion |
+| `<C-]>` | i | Dismiss |
+| `<Tab>` | n | Accept the Next Edit Suggestion and jump to it |
+
+Suggestions auto-trigger as you type. **Next Edit Suggestions** are the predictive
+part: after you make a change, Copilot proposes the *next* edit implied by it —
+often in a different place in the file — and `<Tab>` in normal mode jumps there and
+applies it. When nothing is pending, `<Tab>` falls through to its normal meaning.
+Pending suggestions clear themselves after 3 cursor moves.
 
 ### Git
 
@@ -183,15 +241,60 @@ Leader is `<Space>` by default (unless overridden in `set.lua`).
 | `<C-e>` | Toggle quick menu |
 | `<C-Up/Right/Down/Left>` | Jump to slot 1 / 2 / 3 / 4 |
 
-### Claude Code
+### CodeCompanion — write code *with* AI (`<leader>k`)
+
+This is the Cursor `Cmd+K` / `Cmd+L` layer: small, fast, reviewable edits, so you
+don't have to escalate every change to the full agent.
+
+| Key | Mode | Action |
+| --- | --- | --- |
+| `<leader>kk` | n | Inline edit — leaves the cmdline open, type the instruction |
+| `<leader>kk` | v | Inline edit scoped to the selection |
+| `<leader>kc` | n/v | Toggle the chat buffer |
+| `<leader>ka` | n/v | Action palette (every prompt, in telescope) |
+| `<leader>kd` | v | Add the selection to the open chat |
+| `<leader>ke` | v | Explain the selection |
+| `<leader>kf` | v | Fix the selection |
+| `<leader>kt` | v | Generate unit tests (lands in a new buffer) |
+| `<leader>kl` | v | Explain the LSP diagnostics on the selection |
+| `<leader>kg` | n | Write a commit message from the staged diff |
+| `<leader>km` | n | Generate an ex command from a description |
+
+Inline edits arrive as a **diff in your buffer**, not as text to copy:
 
 | Key | Action |
 | --- | --- |
-| `<leader>ic` | Toggle Claude |
-| `<leader>iC` | `claude --continue` (resume last session) |
-| `<leader>ir` | `claude --resume` (pick a past session) |
-| `<leader>iv` | `claude --verbose` |
-| `<C-,>` | Toggle from inside the Claude terminal |
+| `g2` | Accept the hunk |
+| `g3` | Reject the hunk |
+| `g1` | Accept everything in this buffer from here on |
+| `}` / `{` | Next / previous hunk |
+| `q` | Stop an in-flight request |
+
+`cc` is abbreviated to `CodeCompanion` on the cmdline, so `:cc make this async`
+works, and `:'<,'>cc adapter=anthropic ...` overrides the model for one call.
+
+In the chat buffer, `#buffer` / `#buffers` / `#diagnostics` pull in editor context,
+`/` lists slash commands, `<C-s>` sends, and `?` shows every binding.
+
+### Claude Code — the full agent (`<leader>i`)
+
+| Key | Mode | Action |
+| --- | --- | --- |
+| `<leader>ic` | n | Toggle Claude |
+| `<leader>if` | n | Focus the Claude split |
+| `<leader>iC` | n | `--continue` (resume last session) |
+| `<leader>ir` | n | `--resume` (pick a past session) |
+| `<leader>im` | n | Pick the model |
+| `<leader>ib` | n | Add the current buffer to Claude's context |
+| `<leader>is` | v | Send the selection to Claude |
+| `<leader>iy` | n | Accept Claude's proposed diff |
+| `<leader>in` | n | Reject Claude's proposed diff |
+| `<leader>iq` | n | Close all pending diffs |
+
+Unlike the old terminal-wrapper plugin, this speaks the same WebSocket IDE protocol
+as the VS Code extension. Claude tracks your active buffer and selection on its own,
+and its edits open as **real Neovim diff windows** you can edit before accepting
+(`:w` accepts, `:q` rejects, or use the maps above).
 
 ### DAP (debugger)
 
@@ -274,8 +377,36 @@ Press `<leader>` and pause — **which-key** will show a popup with everything b
 
 ### AI
 
-- **github/copilot.vim** — inline suggestions
-- **greggh/claude-code.nvim** — Claude Code CLI wrapper
+Three layers, deliberately separate, configured together in `lua/plugins/ai.lua`:
+
+- **zbirenbaum/copilot.lua** — ghost-text completion as you type. Replaces the old
+  `copilot.vim`; it's Lua, integrates with nvim-cmp, and exposes the NES API.
+- **copilotlsp-nvim/copilot-lsp** — Copilot **Next Edit Suggestions**. Predicts the
+  next edit implied by your last one and lets you `<Tab>` to it.
+- **olimorris/codecompanion.nvim** — inline edits and the chat buffer. Pinned to
+  `^19.0.0`.
+- **coder/claudecode.nvim** — the agent, over the real IDE protocol. Replaces
+  `greggh/claude-code.nvim`, which only ran `claude` in a terminal split and had no
+  awareness of the editor.
+- **folke/snacks.nvim** — window primitives that `claudecode.nvim` depends on.
+
+**Which model serves which layer, and why:**
+
+| Layer | Adapter | Backed by |
+| --- | --- | --- |
+| Completion + NES | Copilot LSP | Copilot subscription |
+| Inline edit / cmd | `copilot` (HTTP) | Copilot subscription |
+| Chat buffer | `claude_code` (ACP) | Claude subscription |
+| Agent | `claude` CLI | Claude subscription |
+
+CodeCompanion's inline interaction **only accepts HTTP adapters** — it bails with
+*"Only HTTP adapters are supported for inline interactions"* if given an ACP one. So
+inline edits go through the Copilot adapter, which is already authenticated on this
+machine and has lower latency anyway for single-shot edits. Chat, where agent
+capabilities and project `.claude/` skills actually matter, runs Claude over ACP.
+
+To move inline onto Claude instead, add an API key and set
+`interactions.inline.adapter = "anthropic"` — the ACP adapter cannot fill that slot.
 
 ### Markdown
 
@@ -307,7 +438,13 @@ Then update `after/plugin/lualine.lua` — `theme = 'catppuccin-mocha'` to match
 
 ### Disable a plugin temporarily
 
-Comment out the `use 'plugin/name'` line in `lua/achill113/packer.lua`, then `:PackerClean`.
+Set `enabled = false` on its spec in `lua/plugins/`, then `:Lazy clean`. Managing
+plugins day to day is `:Lazy` — `I` installs, `U` updates, `X` cleans, `S` syncs.
+
+### Update plugins
+
+`:Lazy update`. Revisions are pinned in `lazy-lock.json`, which is committed, so
+`:Lazy restore` rolls the whole plugin set back to a known-good state.
 
 ### Add a language
 
@@ -325,15 +462,16 @@ Comment out the `use 'plugin/name'` line in `lua/achill113/packer.lua`, then `:P
 
 ### Treesitter error: `attempt to call method 'range' (a nil value)`
 
-You're on the old archived `master` branch of `nvim-treesitter`. The config uses `main`. Run `:PackerSync` to fix.
+You're on the old archived `master` branch of `nvim-treesitter`. The config uses `main`. Run `:Lazy sync` to fix.
 
 ### Telescope error: `attempt to call field 'ft_to_lang'`
 
 Telescope 0.1.6 referenced an old `nvim-treesitter` API. The config now tracks telescope's `master` branch which uses the built-in `vim.treesitter.language.get_lang()`.
 
-### Packer fails on a divergent local commit
+### lazy.nvim fails on a divergent local commit
 
-Upstream may have rebased / force-pushed. Inside the plugin's directory:
+Upstream may have rebased / force-pushed. Inside the plugin's directory under
+`~/.local/share/nvim/lazy/`:
 
 ```sh
 git reset --hard origin/HEAD
@@ -341,10 +479,63 @@ git reset --hard origin/HEAD
 
 This is safe as long as you haven't made local edits to the plugin.
 
+### Leftover packer plugins
+
+The migration to lazy.nvim moved the old tree aside to
+`~/.local/share/nvim/site/pack/packer.bak-<timestamp>/`. Neovim auto-loads anything
+under `site/pack/*/start/`, so if that directory is restored you get **two copies of
+every plugin** — including the retired `copilot.vim`, which will fight `copilot.lua`
+over ghost text. Delete the backup once you're satisfied the new setup works:
+
+```sh
+rm -rf ~/.local/share/nvim/site/pack/packer.bak-*
+```
+
 ### LSP server doesn't attach
 
 Mason needs to have installed it. Run `:Mason`, find the server, press `i`. Alternatively, `:checkhealth lsp` to diagnose.
 
 ### Claude Code key (`<leader>ic`) does nothing
 
-Make sure the `claude` CLI is on your `$PATH` (`which claude`). The plugin shells out to it.
+Make sure the `claude` CLI is on your `$PATH` (`which claude`). The plugin shells out
+to it. `:ClaudeCodeStatus` reports whether the WebSocket server is up and whether
+Claude has actually connected to it.
+
+### Chat buffer fails to start
+
+The chat adapter spawns `claude-agent-acp`, which is a **separate** binary from the
+`claude` CLI:
+
+```sh
+command -v claude-agent-acp || npm install -g @agentclientprotocol/claude-agent-acp
+```
+
+If it's installed but still not found, note that a global `npm -g` install is tied to
+the active Node version — switching nvm versions hides it. Either reinstall under the
+new version, or point the adapter at `npx` in `lua/plugins/ai.lua`:
+
+```lua
+adapters = {
+  acp = {
+    extend = {
+      claude_code = {
+        commands = { default = { "npx", "-y", "@agentclientprotocol/claude-agent-acp" } },
+      },
+    },
+  },
+},
+```
+
+If it starts but every request fails to authenticate, `CLAUDE_CODE_OAUTH_TOKEN` is
+missing from the environment. Run `claude setup-token` and export it.
+
+### Inline edit errors with "Only HTTP adapters are supported"
+
+You've set `interactions.inline.adapter` to an ACP adapter such as `claude_code`.
+Inline only works over HTTP — use `copilot` or `anthropic`. See the AI section above.
+
+### Copilot suggestions never appear
+
+`:Copilot status`. If unauthenticated, run `:Copilot auth`. If the old `copilot.vim`
+is still on the runtimepath (see *Leftover packer plugins*), the two plugins will
+compete and neither behaves correctly.
