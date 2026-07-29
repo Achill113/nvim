@@ -113,6 +113,52 @@ check("copilot.vim is gone", not pcall(vim.fn.exists, "*copilot#Accept") or vim.
 check("no packer on rtp", not vim.o.runtimepath:match("pack/packer/"))
 check("markdown-preview binary present", vim.fn.glob(vim.fn.stdpath("data") .. "/lazy/markdown-preview.nvim/app/bin/*") ~= "")
 
+print("\n== treesitter queries ==")
+-- nvim-treesitter symlinks site/queries/<lang> at its own runtime/queries/<lang>.
+-- Moving or renaming the plugin directory breaks every link silently: parsers keep
+-- loading, so highlighting just quietly stops contributing and folds disappear.
+local qdir = vim.fn.stdpath("data") .. "/site/queries"
+local broken = {}
+for name, kind in vim.fs.dir(qdir) do
+  if kind == "link" and vim.uv.fs_stat(qdir .. "/" .. name) == nil then
+    table.insert(broken, name)
+  end
+end
+check("no broken query symlinks", #broken == 0, table.concat(broken, ", "))
+
+local missing = {}
+for _, lang in ipairs({ "lua", "go", "rust", "typescript", "tsx", "javascript", "json", "yaml", "html", "css", "bash", "c", "markdown" }) do
+  for _, q in ipairs({ "highlights", "folds" }) do
+    local ok, res = pcall(vim.treesitter.query.get, lang, q)
+    if not (ok and res) then
+      table.insert(missing, lang .. "/" .. q)
+    end
+  end
+end
+check("highlights+folds queries resolve", #missing == 0, table.concat(missing, ", "))
+
+print("\n== folding ==")
+check("foldmethod is expr", vim.o.foldmethod == "expr", vim.o.foldmethod)
+check("foldexpr uses treesitter", vim.o.foldexpr == "v:lua.vim.treesitter.foldexpr()", vim.o.foldexpr)
+check("foldlevelstart keeps files open", vim.o.foldlevelstart == 99, tostring(vim.o.foldlevelstart))
+
+-- Editing a real file, because fold levels are computed lazily and a synthetic
+-- buffer in a headless session never triggers the evaluation.
+local gofile = vim.fn.tempname() .. ".go"
+vim.fn.writefile({
+  "package main",
+  "",
+  "func add(a, b int) int {",
+  "\treturn a + b",
+  "}",
+}, gofile)
+vim.cmd.edit(gofile)
+vim.wait(3000, function()
+  return vim.fn.foldlevel(3) > 0
+end, 100)
+check("go function is foldable", vim.fn.foldlevel(3) > 0, "foldlevel(3)=" .. vim.fn.foldlevel(3))
+vim.fn.delete(gofile)
+
 print(string.format("\n%d/%d checks passed\n", checks - fails, checks))
 if fails > 0 then
   vim.cmd("cq")

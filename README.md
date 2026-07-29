@@ -226,6 +226,21 @@ often in a different place in the file — and `<Tab>` in normal mode jumps ther
 applies it. When nothing is pending, `<Tab>` falls through to its normal meaning.
 Pending suggestions clear themselves after 3 cursor moves.
 
+### Folding
+
+Folds come from treesitter, so they follow the syntax tree rather than indentation,
+and work in every language with a parser. Files open fully expanded
+(`foldlevelstart=99`) rather than collapsed.
+
+| Key | Action |
+| --- | --- |
+| `za` | Toggle the fold under the cursor |
+| `zc` / `zo` | Close / open the fold under the cursor |
+| `zM` / `zR` | Close all / open all folds |
+| `zj` / `zk` | Jump to next / previous fold |
+
+These are stock Vim fold maps — nothing is remapped.
+
 ### Git
 
 | Key | Action |
@@ -358,7 +373,13 @@ Press `<leader>` and pause — **which-key** will show a popup with everything b
 
 ### Treesitter
 
-- **nvim-treesitter** (main branch — the new API, not the archived master) — parsers and highlighting are wired up in `after/plugin/treesitter.lua`. Highlighting is enabled via a `FileType` autocmd that calls `vim.treesitter.start()`.
+- **nvim-treesitter** (main branch — the new API, not the archived master) — parsers and highlighting are wired up in `after/plugin/treesitter.lua`. Highlighting is enabled via a `FileType` autocmd that calls `vim.treesitter.start()`. Folding is configured globally in `set.lua` via `vim.treesitter.foldexpr()`, which safely returns `0` for filetypes with no parser.
+
+  Worth knowing: `install()` does **not** copy queries into
+  `~/.local/share/nvim/site/queries/`, it **symlinks** them at the plugin's own
+  `runtime/queries/`. Move or rename the plugin directory and every link breaks at
+  once. Parsers keep loading, so nothing errors — highlighting just silently stops
+  contributing captures and folds vanish. `tests/verify.lua` checks for this.
 
 ### LSP / completion / formatting
 
@@ -490,6 +511,34 @@ over ghost text. Delete the backup once you're satisfied the new setup works:
 ```sh
 rm -rf ~/.local/share/nvim/site/pack/packer.bak-*
 ```
+
+Nothing points into that directory any more, so removing it is safe.
+
+### No folds, or treesitter highlighting looks flat
+
+The query symlinks under `~/.local/share/nvim/site/queries/` point at
+nvim-treesitter's `runtime/queries/`. If the plugin directory moved, they are all
+dangling, and the failure is silent — parsers still load, so you get no error, just
+no folds and no treesitter captures.
+
+```sh
+find ~/.local/share/nvim/site/queries -maxdepth 1 -type l ! -exec test -e {} \; -print
+```
+
+Anything listed is broken. Delete the dead links and reinstall to recreate them:
+
+```sh
+find ~/.local/share/nvim/site/queries -maxdepth 1 -type l -delete
+```
+
+```vim
+:lua require("nvim-treesitter").install(require("nvim-treesitter.config").get_installed("parsers"), { force = true }):wait(900000)
+```
+
+`nvim --headless -c "luafile tests/verify.lua" -c qa` asserts the links are intact.
+
+Note that `vimdoc` legitimately has no `folds.scm` upstream — it uses the built-in
+runtime ftplugin for folding, so its absence from the query check is expected.
 
 ### LSP server doesn't attach
 

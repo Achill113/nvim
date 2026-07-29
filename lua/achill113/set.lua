@@ -31,4 +31,11 @@ vim.opt.updatetime = 50
 
 vim.opt.colorcolumn = "80"
 
+-- Treesitter folds for every language with a parser; foldexpr degrades to 0
+-- where there isn't one. foldlevelstart keeps files open rather than collapsed.
+vim.opt.foldmethod = "expr"
+vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+vim.opt.foldlevelstart = 99
+vim.opt.foldenable = true
+
 vim.g.go_gopls_enabled = 0
