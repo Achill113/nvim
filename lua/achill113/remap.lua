@@ -41,7 +41,24 @@ vim.keymap.set("v", "<A-k>", ":m '<-2<CR>gv=gv")
 vim.keymap.set("n", "<leader>tf", ":NERDTreeFocus<CR>")
 vim.keymap.set("n", "<C-n>", ":NERDTree<CR>")
 vim.keymap.set("n", "<C-t>", ":NERDTreeToggle<CR>")
-vim.keymap.set("n", "<C-f>", ":NERDTreeFind<CR>")
+vim.keymap.set("n", "<C-o>", ":NERDTreeFind<CR>")
 
 -- Terminal
 vim.api.nvim_set_keymap('n', '<leader>t', ':terminal<CR>', { noremap = true, silent = true })
+
+-- Reload config. Clearing package.loaded is what makes this work at all —
+-- init.lua only requires achill113, so a bare dofile hits the module cache and
+-- re-executes nothing. achill113.lazy stays cached on purpose: re-running
+-- lazy.setup() is unsupported and warns. after/plugin/ is not re-sourced either,
+-- so LSP, cmp and the AI plugins still need a restart.
+function _G.ReloadNvimConfig()
+  for name in pairs(package.loaded) do
+    if name:match("^achill113") and name ~= "achill113.lazy" then
+      package.loaded[name] = nil
+    end
+  end
+  dofile(vim.env.MYVIMRC or vim.fn.stdpath('config') .. '/init.lua')
+  vim.notify("Neovim config reloaded", vim.log.levels.INFO)
+end
+
+vim.keymap.set('n', '<leader>rc', ReloadNvimConfig, { desc = "Reload config" })

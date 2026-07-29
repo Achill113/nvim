@@ -158,7 +158,7 @@ against the wrong prefix.
 | `<leader>tf` | Focus NERDTree |
 | `<C-n>` | Open NERDTree |
 | `<C-t>` | Toggle NERDTree |
-| `<C-f>` | Find current file in NERDTree |
+| `<C-o>` | Find current file in NERDTree (shadows the built-in jumplist-back) |
 
 ### Telescope
 
@@ -328,11 +328,19 @@ and its edits open as **real Neovim diff windows** you can edit before accepting
 | Key | Action |
 | --- | --- |
 | `<leader>u` | Toggle undotree |
+| `<leader>rc` | Reload `set.lua` + `remap.lua` (see note below) |
 | `<leader>mp` | Toggle markdown browser preview |
 | `<leader>;` | Pick from dropbar breadcrumb |
 | `<leader>t` | Open terminal |
 | `<leader>x` | Strip carriage returns (`%s/\r//`) |
 | `Q` | Disabled |
+
+`<leader>rc` clears the `achill113*` entries from `package.loaded` before re-running
+`init.lua`. Without that, `require` returns cached modules and the reload silently
+does nothing. `achill113.lazy` is deliberately left cached, because re-running
+`lazy.setup()` is unsupported and warns. It does **not** re-source `after/plugin/`,
+so LSP, cmp, and the AI plugins still need a restart. For a single file,
+`<leader><leader>` sources the current buffer and is usually what you want.
 
 Press `<leader>` and pause — **which-key** will show a popup with everything bound under each prefix.
 
