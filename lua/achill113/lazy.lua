@@ -1,3 +1,10 @@
+-- Neovim's own `syntax on` runs after every user script, so the syntaxset FileType
+-- autocmd would be registered after any plugin lazy sources here. It ends up last in
+-- the FileType chain and its `syn clear` wipes syntax that plugins add on the same
+-- event — vim-devicons' NERDTree bracket conceal, for one. Packer never hit this
+-- because pack/*/start is loaded after startup, not from inside init.lua.
+vim.cmd("syntax enable")
+
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 
 if not (vim.uv or vim.loop).fs_stat(lazypath) then

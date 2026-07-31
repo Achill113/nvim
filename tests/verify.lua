@@ -76,6 +76,9 @@ for _, spec in ipairs({
   { "v", "\\is", "claude send selection" },
   { "n", "\\iy", "claude accept diff" },
   { "n", "\\a", "harpoon add_file still intact" },
+  { "n", "\\gf", "changed files picker" },
+  { "n", "\\gd", "diff current file against HEAD" },
+  { "n", "\\gs", "fugitive status still intact" },
 }) do
   check(spec[1] .. " " .. spec[3], has_map(spec[1], spec[2]), spec[2])
 end
@@ -158,6 +161,63 @@ vim.wait(3000, function()
 end, 100)
 check("go function is foldable", vim.fn.foldlevel(3) > 0, "foldlevel(3)=" .. vim.fn.foldlevel(3))
 vim.fn.delete(gofile)
+
+-- Last, because it changes the cwd and leaves the tree window current.
+print("\n== nerdtree ==")
+-- vim-devicons hangs its bracket-conceal syntax off FileType nerdtree. Neovim's
+-- default `syntax on` registers the syntaxset autocmd after every user script, so
+-- under lazy it fires last and `syn clear`s those matches straight back out again.
+-- Assert the rendered result rather than the autocmd order.
+-- Resolved, because on macOS tempname() sits under the /var -> /private/var
+-- symlink and the git plugin keys its status map off the real workdir path.
+local repo = vim.fn.tempname()
+vim.fn.mkdir(repo, "p")
+repo = vim.uv.fs_realpath(repo)
+local function git(...)
+  vim.fn.system(vim.list_extend({ "git", "-C", repo, "-c", "user.email=t@t", "-c", "user.name=t" }, { ... }))
+end
+git("init", "-q")
+vim.fn.writefile({ "one" }, repo .. "/tracked.txt")
+git("add", "-A")
+git("commit", "-qm", "init")
+vim.fn.writefile({ "one", "two" }, repo .. "/tracked.txt")
+vim.fn.writefile({ "new" }, repo .. "/untracked.txt")
+
+vim.cmd.cd(repo)
+vim.cmd("NERDTree")
+check("nerdtree window is current", vim.bo.filetype == "nerdtree", vim.bo.filetype)
+check(
+  "devicons bracket conceal survives the syntax load",
+  vim.fn.execute("silent! syn list hideBracketsInNerdTree"):match("NERDTreeFlags") ~= nil
+)
+-- 3 is devicons' value; nerdtree's own syntax file leaves 2 behind when it wins.
+check("devicons set conceallevel last", vim.wo.conceallevel == 3, tostring(vim.wo.conceallevel))
+
+-- Both decorators reach the tree through nerdtree's `runtime! nerdtree_plugin/**`,
+-- which only sees what is already on the runtimepath when NERD_tree.vim is sourced.
+check("git plugin was picked up by nerdtree", vim.g.loaded_nerdtree_git_status == 1)
+check("devicons nerdtree integration is on", vim.g.webdevicons_enable_nerdtree == 1)
+check("devicons flag listener exists", vim.fn.exists("*NERDTreeWebDevIconsRefreshListener") == 1)
+
+-- The rendered flag block itself. The git half arrives from an async `git status`
+-- job, so the first render is always blank and this has to poll. \a is the
+-- delimiter nerdtree puts between the flag block and the node name.
+local function tree_line(name)
+  for _, line in ipairs(vim.api.nvim_buf_get_lines(0, 0, -1, false)) do
+    if line:find("\a" .. name, 1, true) then
+      return line
+    end
+  end
+  return ""
+end
+local glyph = vim.fn.WebDevIconsGetFileTypeSymbol("tracked.txt", 0)
+local tracked, untracked = "", ""
+check("git status flags render", vim.wait(10000, function()
+  tracked, untracked = tree_line("tracked.txt"), tree_line("untracked.txt")
+  return tracked:match("✹") ~= nil and untracked:match("✭") ~= nil
+end, 100), tracked .. untracked)
+check("devicons glyph renders alongside them", tracked:find(glyph, 1, true) ~= nil, tracked)
+vim.fn.delete(repo, "rf")
 
 print(string.format("\n%d/%d checks passed\n", checks - fails, checks))
 if fails > 0 then

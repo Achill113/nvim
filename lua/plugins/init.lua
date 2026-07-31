@@ -26,9 +26,18 @@ return {
   },
 
   -- File tree
-  "preservim/nerdtree",
-  "Xuyuanp/nerdtree-git-plugin",
-  "tiagofumo/vim-nerdtree-syntax-highlight",
+  -- NERD_tree.vim sources `nerdtree_plugin/**` once, from the runtimepath as it
+  -- stands at that moment, so anything decorating the tree has to already be on it.
+  -- lazy's startup order is not stable, so without this the git flags and devicons
+  -- glyphs went missing on a random subset of launches.
+  {
+    "preservim/nerdtree",
+    dependencies = {
+      "Xuyuanp/nerdtree-git-plugin",
+      "tiagofumo/vim-nerdtree-syntax-highlight",
+      "ryanoasis/vim-devicons",
+    },
+  },
 
   -- Editor utilities
   "editorconfig/editorconfig-vim",

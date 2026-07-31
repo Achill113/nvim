@@ -53,3 +53,6 @@ require('gitsigns').setup {
 }
 
 vim.keymap.set("n", "<C-b>", ":Gitsigns toggle_current_line_blame<CR>")
+vim.keymap.set("n", "<leader>gd", function()
+  require('gitsigns').diffthis()
+end, { desc = "Diff file against HEAD" })

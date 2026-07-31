@@ -15,6 +15,12 @@ Non-zero exit means at least one check failed; each failure prints the offending
 Run this after touching `lua/plugins/`, `lua/achill113/lazy.lua`, or the cmp mapping in
 `after/plugin/lsp.lua`.
 
+The `nerdtree` section builds a throwaway git repo and opens the tree in it, because both
+ways NERDTree's decorations broke under lazy are invisible until something renders: the
+`runtime! nerdtree_plugin/**` load order, and vim-devicons' bracket conceal being cleared
+by the syntaxset `FileType` autocmd. It is the slowest section — the git flags come from an
+async `git status` job, so it polls for up to ten seconds.
+
 Two things it deliberately does **not** cover, because both need credentials and a
 network round trip:
 

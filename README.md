@@ -160,6 +160,13 @@ against the wrong prefix.
 | `<C-t>` | Toggle NERDTree |
 | `<C-o>` | Find current file in NERDTree (shadows the built-in jumplist-back) |
 
+NERDTree's git flags and file glyphs come from `nerdtree-git-plugin`, `vim-devicons` and
+`vim-nerdtree-syntax-highlight`, which all hook in through the one-shot
+`runtime! nerdtree_plugin/**` at the bottom of `NERD_tree.vim`. That only sees plugins
+already on the runtimepath, and lazy's startup order is not stable, so they are declared
+as `dependencies` of nerdtree rather than as siblings. Listing them side by side means the
+decorations disappear on a random subset of launches.
+
 ### Telescope
 
 | Key | Action |
@@ -245,8 +252,15 @@ These are stock Vim fold maps — nothing is remapped.
 
 | Key | Action |
 | --- | --- |
+| `<leader>gf` | Changed files, with a diff preview (`:Telescope git_status`) |
+| `<leader>gd` | Diff the current file against HEAD in a split |
 | `<leader>gs` | Open fugitive (`:Git`) |
 | `<C-b>` | Toggle current-line blame (gitsigns) |
+
+`<leader>gf` is the closest thing here to VS Code's Source Control panel: every file with
+uncommitted changes, fuzzy-filterable, `<CR>` to open one and `<Tab>` to stage it. The diff
+preview only appears on terminals wider than 120 columns — that is telescope's
+`preview_cutoff`. `<leader>gs` is still fugitive if you want the full staging UI.
 
 ### Harpoon
 
