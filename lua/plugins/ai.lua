@@ -96,6 +96,15 @@ return {
       map("n", "<leader>km", "<cmd>CodeCompanionCmd<cr>", "AI: generate an ex command")
     end,
     opts = {
+      adapters = {
+        acp = {
+          extend = {
+            claude_code = {
+              env = { CLAUDE_CODE_OAUTH_TOKEN = require("achill113.claude_token").read },
+            },
+          },
+        },
+      },
       interactions = {
         -- Chat goes through Claude Code over ACP, so project skills in .claude/
         -- and your configured MCP servers are available in the conversation.

@@ -56,6 +56,29 @@ check("inline adapter == copilot", cc.interactions.inline.adapter == "copilot", 
 check("cmd adapter == copilot", cc.interactions.cmd.adapter == "copilot", tostring(cc.interactions.cmd.adapter))
 check("diff enabled", cc.display.diff.enabled == true)
 
+print("\n== claude oauth token ==")
+-- The token lives in the OS keyring, not the shell environment: exporting
+-- CLAUDE_CODE_OAUTH_TOKEN from ~/.zshrc overrides whatever the `claude` CLI
+-- itself is logged in as, so it has to reach the ACP adapter and nothing else.
+local token = require("achill113.claude_token")
+check("keyring command on macOS uses security", token.command("Darwin")[1] == "security", vim.inspect(token.command("Darwin")))
+check("keyring command on Linux uses secret-tool", token.command("Linux")[1] == "secret-tool", vim.inspect(token.command("Linux")))
+check("both query the same keyring entry", vim.tbl_contains(token.command("Darwin"), token.service) and vim.tbl_contains(token.command("Linux"), token.service), token.service)
+
+local tmp = vim.fn.tempname()
+vim.fn.writefile({ "sk-ant-from-file" }, tmp)
+check("file fallback reads and trims", token.read_file(tmp) == "sk-ant-from-file", vim.inspect(token.read_file(tmp)))
+vim.fn.delete(tmp)
+check("missing fallback file is nil, not an error", token.read_file(tmp .. "-nope") == nil)
+
+check("not exported into the shell environment", vim.env.CLAUDE_CODE_OAUTH_TOKEN == nil, "still exported — check ~/.zshrc")
+
+local adapter = require("codecompanion.adapters").resolve("claude_code")
+check("adapter resolves the token itself", type(adapter.env.CLAUDE_CODE_OAUTH_TOKEN) == "function", type(adapter.env.CLAUDE_CODE_OAUTH_TOKEN))
+require("codecompanion.adapters.utils").get_env_vars(adapter, { timeout = 5000 })
+local resolved = adapter.env_replaced.CLAUDE_CODE_OAUTH_TOKEN
+check("keyring hands back a token", type(resolved) == "string" and resolved:match("^sk%-ant%-") ~= nil, vim.inspect(resolved and resolved:sub(1, 12)))
+
 print("\n== keymaps ==")
 local function has_map(mode, lhs)
   for _, m in ipairs(vim.api.nvim_get_keymap(mode)) do

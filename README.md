@@ -64,13 +64,33 @@ interactive browser flow, so it has to be run from a shell:
 claude setup-token
 ```
 
-Export the token it prints so the ACP adapter can pick it up — it is read from
-the environment, deliberately, so no credential ends up in this repo:
+Store the token it prints in the OS keyring, under the service name
+`claude-code-oauth`. Neovim reads it from there when the chat buffer starts, so
+no credential ends up in this repo or in your shell environment:
 
 ```sh
-# ~/.zshrc
-export CLAUDE_CODE_OAUTH_TOKEN="..."
+# macOS
+security add-generic-password -a "$USER" -s claude-code-oauth -U \
+  -T /usr/bin/security -l "Claude Code OAuth token" -w "sk-ant-oat01-..."
+
+# Linux (libsecret; on Debian/Ubuntu that is the libsecret-tools package)
+secret-tool store --label="Claude Code OAuth token" service claude-code-oauth
 ```
+
+`-T /usr/bin/security` is what keeps macOS from popping an authorization dialog
+on every read. Where there is no keyring — a headless box, WSL without a session
+bus — fall back to a file instead:
+
+```sh
+install -m 600 /dev/null ~/.config/claude/oauth-token
+printf '%s' "sk-ant-oat01-..." > ~/.config/claude/oauth-token
+```
+
+Do **not** `export CLAUDE_CODE_OAUTH_TOKEN` from `~/.zshrc`. That variable
+overrides the account the `claude` CLI itself is logged in as, in every shell,
+so a token that has gone stale breaks the CLI in ways that look like a login
+bug. `lua/achill113/claude_token.lua` hands the token to the ACP adapter and
+nothing else.
 
 Restart Neovim one more time and everything should be ready.
 
@@ -85,7 +105,8 @@ Restart Neovim one more time and everything should be ready.
 │   ├── init.lua                   # requires set + remap + lazy
 │   ├── set.lua                    # leader, vim.opt options, global vim.g flags
 │   ├── remap.lua                  # global keymaps (no plugin dependency)
-│   └── lazy.lua                   # bootstraps lazy.nvim and imports lua/plugins
+│   ├── lazy.lua                   # bootstraps lazy.nvim and imports lua/plugins
+│   └── claude_token.lua           # reads the OAuth token out of the OS keyring
 ├── lua/plugins/                   # plugin manifest (lazy.nvim specs)
 │   ├── init.lua                   # everything non-AI
 │   └── ai.lua                     # copilot, codecompanion, claudecode + their config
@@ -597,8 +618,11 @@ adapters = {
 },
 ```
 
-If it starts but every request fails to authenticate, `CLAUDE_CODE_OAUTH_TOKEN` is
-missing from the environment. Run `claude setup-token` and export it.
+If it starts but every request fails to authenticate, the keyring lookup came
+back empty. Check it directly — `security find-generic-password -s
+claude-code-oauth -w` on macOS, `secret-tool lookup service claude-code-oauth`
+on Linux. If it prints nothing, or the token has expired, run
+`claude setup-token` and store the new one as described in Installation.
 
 ### Inline edit errors with "Only HTTP adapters are supported"
 
