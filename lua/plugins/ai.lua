@@ -158,7 +158,10 @@ return {
       { "<leader>iq", "<cmd>ClaudeCodeCloseAllDiffs<cr>", desc = "Claude: close all diffs" },
     },
     opts = {
-      terminal_cmd = "claude --dangerously-skip-permissions",
+      -- env -u because the chat buffer's ACP adapter authenticates by setting
+      -- vim.env, which every terminal Neovim spawns afterwards inherits — and
+      -- that token overrides the account the CLI is logged in as.
+      terminal_cmd = "env -u CLAUDE_CODE_OAUTH_TOKEN claude --dangerously-skip-permissions",
       track_selection = true,
       terminal = {
         split_side = "right",

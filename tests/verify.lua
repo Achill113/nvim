@@ -128,13 +128,26 @@ check("set_keymap binds <Tab> buffer-locally", buf_has_tab)
 
 print("\n== preserved behaviour ==")
 check("mapleader is backslash", vim.g.mapleader == "\\", vim.inspect(vim.g.mapleader))
+-- The CodeCompanion ACP adapter authenticates by assigning vim.env, which is
+-- process-wide: every terminal opened afterwards, including this one, would
+-- inherit a token that overrides whatever the CLI is logged in as. `env -u`
+-- puts the CLI back on its own credentials.
 check("claude terminal_cmd keeps --dangerously-skip-permissions", (function()
   local ok, mod = pcall(require, "claudecode")
   return ok
     and mod.state
     and mod.state.config
-    and mod.state.config.terminal_cmd == "claude --dangerously-skip-permissions"
+    and mod.state.config.terminal_cmd == "env -u CLAUDE_CODE_OAUTH_TOKEN claude --dangerously-skip-permissions"
+end)(), (function()
+  local ok, mod = pcall(require, "claudecode")
+  return ok and mod.state and mod.state.config and tostring(mod.state.config.terminal_cmd) or "no config"
 end)())
+
+local acp_adapter = require("codecompanion.adapters").resolve("claude_code")
+require("codecompanion.adapters.utils").get_env_vars(acp_adapter, { timeout = 5000 })
+acp_adapter.handlers.auth(acp_adapter)
+check("chat auth leaks the token into vim.env, hence the env -u above", vim.env.CLAUDE_CODE_OAUTH_TOKEN ~= nil)
+vim.env.CLAUDE_CODE_OAUTH_TOKEN = nil
 check("copilot.vim is gone", not pcall(vim.fn.exists, "*copilot#Accept") or vim.fn.exists("*copilot#Accept") == 0)
 check("no packer on rtp", not vim.o.runtimepath:match("pack/packer/"))
 check("markdown-preview binary present", vim.fn.glob(vim.fn.stdpath("data") .. "/lazy/markdown-preview.nvim/app/bin/*") ~= "")
